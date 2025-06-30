@@ -21,6 +21,15 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+## Running Tests
+
+Install `pytest` and run the test suite:
+
+```bash
+pip install pytest
+pytest
+```
+
 Further phases (sprint planning, daily simulation, retrospective) will be added following the specification in AGENTS.md.
 
 ## Specification
