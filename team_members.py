@@ -1,7 +1,7 @@
 """
 Module defining TeamMember model for sprint simulation.
 """
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List
 
 
@@ -15,7 +15,7 @@ class TeamMember(BaseModel):
     specialties: List[str]
     availability: float = 1.0  # fraction of capacity (0.0-1.0)
     current_workload: int = 0
-    completed_tickets: List[str] = []
+    completed_tickets: List[str] = Field(default_factory=list)
 
     def can_handle_ticket(self, ticket) -> bool:
         """
