@@ -21,18 +21,51 @@ class SprintSimulator:
         """
         Run the full sprint simulation end-to-end.
         """
-        raise NotImplementedError
+        for day in range(1, self.sprint_length + 1):
+            self.current_day = day
+            self.simulate_daily_standup(day)
+            self.simulate_work_day(day)
+
+        return self.daily_logs
 
     def simulate_daily_standup(self, day):
         """
         Simulate the daily standup meeting content.
         :param day: Day index.
         """
-        raise NotImplementedError
+        lines = [f"Day {day} Standup"]
+        for member in self.team:
+            lines.append(
+                f"- {member.name}: {len(member.completed_tickets)} tickets completed"
+            )
+        self.daily_logs.append("\n".join(lines))
 
     def simulate_work_day(self, day):
         """
         Simulate the activities of a single work day.
         :param day: Day index.
         """
-        raise NotImplementedError
+        from daily_work_simulator import DailyWorkSimulator
+
+        assignments = {member.name: [] for member in self.team}
+
+        for ticket in self.sprint_backlog:
+            if ticket.status != "Open":
+                continue
+            for member in self.team:
+                if member.can_handle_ticket(ticket):
+                    assignments[member.name].append(ticket)
+                    ticket.status = "Assigned"
+                    break
+
+        for member in self.team:
+            tickets = assignments[member.name]
+            if not tickets:
+                continue
+            logs = DailyWorkSimulator().simulate_work_day(member, tickets, day)
+            self.daily_logs.extend(logs)
+
+        for ticket in list(self.sprint_backlog):
+            if ticket.status == "Closed":
+                self.sprint_backlog.remove(ticket)
+                self.completed_work.append(ticket)

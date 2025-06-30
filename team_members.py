@@ -21,10 +21,27 @@ class TeamMember(BaseModel):
         """
         Determine if this member can handle the given ticket.
         """
-        raise NotImplementedError
+        # Project managers typically don't work tickets directly
+        if self.role.lower().startswith("project manager"):
+            return False
+
+        # If the ticket category matches one of the member's specialties,
+        # we assume they can handle it.
+        if ticket.category in self.specialties:
+            return True
+
+        # Senior members (skill level >=7) can generally help with any ticket
+        return self.skill_level >= 7
 
     def estimate_effort(self, ticket) -> int:
         """
         Estimate effort (e.g., story points or time) for the ticket.
         """
-        raise NotImplementedError
+        base = ticket.estimated_effort or 1
+
+        # Higher skill reduces effort while low availability increases it
+        skill_factor = max(0.5, 1.5 - (self.skill_level / 10))
+        avail_factor = 1 / self.availability if self.availability > 0 else 2
+
+        effort = int(round(base * skill_factor * avail_factor))
+        return max(1, effort)
