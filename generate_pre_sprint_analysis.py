@@ -122,7 +122,7 @@ def main():
 
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     with open(args.output, "w") as f:
-        f.write(f"# Pre-Sprint Analysis\n\n")
+        f.write("# Pre-Sprint Analysis\n\n")
         f.write(f"_Generated on {now}_\n\n")
         f.write("## Ticket Backlog\n\n")
         f.write(format_tickets(tickets) + "\n\n")
