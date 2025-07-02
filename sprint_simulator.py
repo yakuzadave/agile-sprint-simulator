@@ -47,22 +47,60 @@ class SprintSimulator:
         """
         from daily_work_simulator import DailyWorkSimulator
 
+        work_sim = DailyWorkSimulator()
+
+        ticket_lookup = {t.ticket_id: t for t in self.sprint_backlog + self.completed_work}
+
         assignments = {member.name: [] for member in self.team}
 
         for ticket in self.sprint_backlog:
+            if ticket.status == "Closed":
+                continue
+
+            if ticket.dependencies:
+                unresolved = [
+                    dep for dep in ticket.dependencies
+                    if ticket_lookup.get(dep) and ticket_lookup[dep].status != "Closed"
+                ]
+                if unresolved:
+                    ticket.status = "Blocked"
+                    self.daily_logs.append(
+                        f"Day {day} | {ticket.ticket_id} blocked waiting for {','.join(unresolved)}"
+                    )
+                    continue
+                else:
+                    if ticket.status == "Blocked":
+                        ticket.status = "Open"
+
             if ticket.status != "Open":
                 continue
+
             for member in self.team:
                 if member.can_handle_ticket(ticket):
                     assignments[member.name].append(ticket)
                     ticket.status = "Assigned"
                     break
 
+        escalated_assignments = {member.name: [] for member in self.team}
+
         for member in self.team:
             tickets = assignments[member.name]
             if not tickets:
                 continue
-            logs = DailyWorkSimulator().simulate_work_day(member, tickets, day)
+            logs, escalated = work_sim.simulate_work_day(member, tickets, day, ticket_lookup)
+            self.daily_logs.extend(logs)
+
+            for t in escalated:
+                for senior in self.team:
+                    if senior.skill_level >= 7 and senior.can_handle_ticket(t):
+                        escalated_assignments[senior.name].append(t)
+                        break
+
+        for member in self.team:
+            tickets = escalated_assignments[member.name]
+            if not tickets:
+                continue
+            logs, _ = work_sim.simulate_work_day(member, tickets, day, ticket_lookup)
             self.daily_logs.extend(logs)
 
         for ticket in list(self.sprint_backlog):
