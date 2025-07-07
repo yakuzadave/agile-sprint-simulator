@@ -16,6 +16,7 @@ class SprintSimulator:
         self.sprint_backlog = []
         self.completed_work = []
         self.daily_logs = []
+        self.metrics = {}
 
     def run_complete_simulation(self):
         """
@@ -26,7 +27,45 @@ class SprintSimulator:
             self.simulate_daily_standup(day)
             self.simulate_work_day(day)
 
+        # Capture metrics at the end of the simulation
+        self.metrics = self.generate_metrics_report()
         return self.daily_logs
+
+    def generate_metrics_report(self):
+        """Generate performance metrics for the completed sprint."""
+        from collections import Counter
+
+        metrics = {}
+        backlog_total = len(self.completed_work) + len(self.sprint_backlog)
+        metrics["total_tickets"] = backlog_total
+        metrics["completed_tickets"] = len(self.completed_work)
+
+        velocity = sum(
+            (t.actual_effort or t.estimated_effort or 0) for t in self.completed_work
+        )
+        metrics["velocity"] = velocity
+
+        metrics["completed_by_priority"] = dict(
+            Counter(t.priority for t in self.completed_work)
+        )
+        metrics["completed_by_category"] = dict(
+            Counter(t.category for t in self.completed_work)
+        )
+        metrics["utilization"] = {m.name: m.current_workload for m in self.team}
+        metrics["escalations"] = len(
+            [log for log in self.daily_logs if "Escalating" in log]
+        )
+        return metrics
+
+    def save_metrics_report(self, path):
+        """Persist metrics as a JSON document."""
+        import json
+
+        if not self.metrics:
+            self.metrics = self.generate_metrics_report()
+
+        with open(path, "w") as f:
+            json.dump(self.metrics, f, indent=2)
 
     def simulate_daily_standup(self, day):
         """
