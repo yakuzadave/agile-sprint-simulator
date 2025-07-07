@@ -36,6 +36,8 @@ class TicketGenerator:
         {'category': 'MFA', 'description': 'Multi-factor authentication setup and troubleshooting'},
         {'category': 'File Sharing', 'description': 'File sharing permission escalations'},
         {'category': 'MDM', 'description': 'Mobile device management (MDM) enrollment issues'},
+        {'category': 'Access Management', 'description': 'User access reviews and permission updates'},
+        {'category': 'Security Patching', 'description': 'Operating system patching and reboot coordination'},
     ]
     INCIDENT_TEMPLATES = [
         {'category': 'Email', 'description': 'Email delivery failures and routing issues'},
@@ -45,6 +47,8 @@ class TicketGenerator:
         {'category': 'Network', 'description': 'Network connectivity issues affecting remote workers'},
         {'category': 'Security', 'description': 'Security incidents requiring immediate response'},
         {'category': 'Backup', 'description': 'Data backup and recovery operations'},
+        {'category': 'Database', 'description': 'Database outage or severe performance issue'},
+        {'category': 'AWS', 'description': 'AWS service disruption impacting production'},
     ]
     PROJECT_TEMPLATES = [
         {'category': 'Google Workspace', 'description': 'Implementation of new Google Workspace policies'},
@@ -54,6 +58,8 @@ class TicketGenerator:
         {'category': 'Infrastructure', 'description': 'Infrastructure upgrades and capacity planning'},
         {'category': 'Compliance', 'description': 'Compliance reporting and audit preparation'},
         {'category': 'Integration', 'description': 'Integration projects between enterprise tools'},
+        {'category': 'Containerization', 'description': 'Docker/Kubernetes environment improvements'},
+        {'category': 'Monitoring', 'description': 'Implementation of new monitoring dashboards'},
     ]
 
     # Distribution weights
