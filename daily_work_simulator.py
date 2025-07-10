@@ -2,6 +2,10 @@
 Module simulating individual team member work days and collaboration patterns.
 """
 
+from log_utils import generate_realistic_timestamp_logs
+from datetime import time
+
+
 class DailyWorkSimulator:
     """Simulate work for individual team members."""
 
@@ -17,14 +21,17 @@ class DailyWorkSimulator:
         :return: List of log strings for the day.
         """
 
+        after_hours = any(t.priority == "Critical" for t in assigned_tickets)
+        ts_gen = generate_realistic_timestamp_logs(day_index=day, after_hours=after_hours)
+
         logs = []
         escalated = []
-        logs.append(f"Day {day} | {team_member.name} | Planning and standup")
+        logs.append(f"{ts_gen()} | {team_member.name} | Planning and standup")
 
         for ticket in assigned_tickets:
             if not team_member.can_handle_ticket(ticket):
                 logs.append(
-                    f"Day {day} | {team_member.name} | Unable to work on {ticket.ticket_id}"
+                    f"{ts_gen()} | {team_member.name} | Unable to work on {ticket.ticket_id}"
                 )
                 continue
 
@@ -38,12 +45,12 @@ class DailyWorkSimulator:
                 if unresolved:
                     ticket.status = "Blocked"
                     logs.append(
-                        f"Day {day} | {team_member.name} | Blocked on {ticket.ticket_id} waiting for {','.join(unresolved)}"
+                        f"{ts_gen()} | {team_member.name} | Blocked on {ticket.ticket_id} waiting for {','.join(unresolved)}"
                     )
                     continue
 
             logs.append(
-                f"Day {day} | {team_member.name} | Started {ticket.ticket_id}: {ticket.description}"
+                f"{ts_gen()} | {team_member.name} | Started {ticket.ticket_id}: {ticket.description}"
             )
 
             ticket.status = "In Progress"
@@ -54,7 +61,7 @@ class DailyWorkSimulator:
                 ticket.status = "Open"
                 ticket.assigned_to = None
                 logs.append(
-                    f"Day {day} | {team_member.name} | Escalating {ticket.ticket_id} to senior engineer"
+                    f"{ts_gen()} | {team_member.name} | Escalating {ticket.ticket_id} to senior engineer"
                 )
                 escalated.append(ticket)
                 continue
@@ -65,8 +72,13 @@ class DailyWorkSimulator:
             team_member.completed_tickets.append(ticket.ticket_id)
 
             logs.append(
-                f"Day {day} | {team_member.name} | Completed {ticket.ticket_id} in {effort} pts"
+                f"{ts_gen()} | {team_member.name} | Completed {ticket.ticket_id} in {effort} pts"
             )
 
-        logs.append(f"Day {day} | {team_member.name} | Wrap up and documentation")
+        logs.append(f"{ts_gen()} | {team_member.name} | Wrap up and documentation")
+
+        if after_hours:
+            end_time = ts_gen.current()
+            if end_time.time() <= time(18, 0):
+                logs.append(f"{ts_gen(force_after_hours=True)} | {team_member.name} | After-hours incident response")
         return logs, escalated
