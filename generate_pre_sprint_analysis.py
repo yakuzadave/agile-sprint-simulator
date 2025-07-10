@@ -10,6 +10,7 @@ from datetime import datetime
 
 from ticket_system import TicketGenerator
 from team_members import TeamMember
+from sprint_planning import simulate_triage_meeting
 
 
 def build_team():
@@ -121,6 +122,8 @@ def main():
     team_size = len(team)
 
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    triage_notes, commitment = simulate_triage_meeting(tickets, team)
+
     with open(args.output, "w") as f:
         f.write("# Pre-Sprint Analysis\n\n")
         f.write(f"_Generated on {now}_\n\n")
@@ -134,9 +137,9 @@ def main():
             f"- Total availability: {total_availability:.1f} FTE\n\n"
         )
         f.write("## Triage Meeting Notes\n\n")
-        f.write("_To be captured in Phase 2_\n\n")
+        f.write(triage_notes + "\n\n")
         f.write("## Sprint Commitment & Goals\n\n")
-        f.write("_To be captured in Phase 2_\n")
+        f.write(commitment + "\n")
 
 
 if __name__ == "__main__":
